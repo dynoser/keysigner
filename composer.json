@@ -1,0 +1,15 @@
+{
+    "name": "dynoser/keysigner",
+    "description": "Allows to sign and verify signatures ed25519",
+    "autoload": {
+        "psr-4": {
+            "dynoser\\keysigner\\": "src/"
+        }
+    },
+    "require": {},
+    "extra": {
+        "dyno-aliases": {
+            "dynoser\\tools\\KeySigner": "dynoser\\keysigner\\KeySigner"
+        }
+    }
+}
