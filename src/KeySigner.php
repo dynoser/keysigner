@@ -36,7 +36,7 @@ class KeySigner implements KeySignerIf
     public function init($keypair_or_pubkey = false, $password = false, $remote_API_obj = null)
     {
         $this->remote_API_obj = $remote_API_obj;
-        if (false === $remote_API_obj) {
+        if (!$remote_API_obj) {
             $keypair = $keypair_or_pubkey;
             if (false === $keypair) {
                 $keypair = \sodium_crypto_sign_keypair();
