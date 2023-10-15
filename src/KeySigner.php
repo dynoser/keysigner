@@ -8,13 +8,15 @@ interface KeySignerIf
 }
 class KeySigner implements KeySignerIf
 {
+    public $signAlg = 'ed25519';
+
     public $pub_key;
     private $priv_key;
     public $can_sign = false; // set true if can
 
-    public $remote_API_obj;
+    public $remote_API_obj = null;
 
-    public function __construct($keypair_or_pubkey = false, $password = false, $remote_API_obj = false)
+    public function __construct($keypair_or_pubkey = false, $password = false, $remote_API_obj = null)
     {
         $keypair_or_pubkey && $this->init($keypair_or_pubkey, $password, $remote_API_obj);
     }
@@ -31,7 +33,7 @@ class KeySigner implements KeySignerIf
         $this->can_sign = true;
     }
 
-    public function init($keypair_or_pubkey = false, $password = false, $remote_API_obj = false)
+    public function init($keypair_or_pubkey = false, $password = false, $remote_API_obj = null)
     {
         $this->remote_API_obj = $remote_API_obj;
         if (false === $remote_API_obj) {
@@ -48,10 +50,17 @@ class KeySigner implements KeySignerIf
                 throw new \Exception("Bad keypair");
             }
             $l = \strlen($keypair);
-            if ((192 === $l || 128 === $l) && \ctype_xdigit($keypair)) {
+            if ($l > 200) {
+                // try decode ed25519 from .ppk format
+                $keyArr = KeyEd25519PPK::extractKeysfromPPKString($keypair, true);
+                if (!\is_array($keyArr)) {
+                    throw new \Exception("Can't decode keypair");
+                }
+                $keypair = $keyArr['ed25519_keypair'];
+            } elseif ((192 === $l || 128 === $l) && \ctype_xdigit($keypair)) {
                 $keypair = \hex2bin($keypair);
-                $l = \strlen($keypair);
             }
+            $l = \strlen($keypair);
             if (128 === $l) { // probably 96 bytes keypair in base64
                 $keypair = \base64_decode($keypair);
                 $l = \strlen($keypair);
